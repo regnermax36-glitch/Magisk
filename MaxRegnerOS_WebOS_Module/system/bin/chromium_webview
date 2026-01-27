@@ -1,0 +1,101 @@
+#!/system/bin/sh
+
+##########################################################################################
+# MaxRegnerOS Chromium WebView v1.1
+# Lightweight Chromium-based web rendering engine
+##########################################################################################
+
+export CHROMIUM_FLAGS="
+--no-sandbox
+--disable-dev-shm-usage
+--disable-gpu-sandbox
+--disable-software-rasterizer
+--disable-background-timer-throttling
+--disable-backgrounding-occluded-windows
+--disable-renderer-backgrounding
+--disable-features=TranslateUI,VizDisplayCompositor
+--enable-features=VaapiVideoDecoder
+--memory-pressure-off
+--max_old_space_size=512
+--aggressive-cache-discard
+--enable-low-end-device-mode
+--enable-prefer-compositing-to-lcd-text
+--disable-extensions
+--disable-plugins
+--disable-background-networking
+--disable-sync
+--disable-translate
+--disable-ipc-flooding-protection
+--process-per-site
+--single-process
+"
+
+# Set user agent
+export USER_AGENT="MaxRegnerOS/1.1 (Samsung Galaxy Z Flip5; Android $(getprop ro.build.version.release)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+
+# Memory and performance optimizations
+export MALLOC_ARENA_MAX=2
+export MALLOC_MMAP_THRESHOLD_=131072
+export MALLOC_TRIM_THRESHOLD_=131072
+export MALLOC_TOP_PAD_=131072
+export MALLOC_MMAP_MAX_=65536
+
+# WebView data directory
+WEBVIEW_DATA_DIR="/data/maxregner_webos/webview"
+mkdir -p "$WEBVIEW_DATA_DIR"
+
+# Function to start chromium webview
+start_chromium() {
+    local URL="${1:-https://www.google.com}"
+    
+    echo "Starting Chromium WebView for MaxRegnerOS..."
+    echo "URL: $URL"
+    echo "User Agent: $USER_AGENT"
+    
+    # Use Android's WebView if available, otherwise fallback
+    if [ -f /system/bin/webview ]; then
+        exec /system/bin/webview \
+            --user-agent="$USER_AGENT" \
+            --data-path="$WEBVIEW_DATA_DIR" \
+            $CHROMIUM_FLAGS \
+            "$URL"
+    else
+        # Fallback to am (Activity Manager) to launch web browser
+        am start -a android.intent.action.VIEW -d "$URL" \
+            --es "user_agent" "$USER_AGENT" \
+            com.android.browser/.BrowserActivity 2>/dev/null || \
+        am start -a android.intent.action.VIEW -d "$URL" \
+            --es "user_agent" "$USER_AGENT" \
+            com.sec.android.app.sbrowser/.SBrowserMainActivity 2>/dev/null || \
+        am start -a android.intent.action.VIEW -d "$URL"
+    fi
+}
+
+# Function to preload webview
+preload_webview() {
+    echo "Preloading WebView components..."
+    
+    # Precompile WebView if possible
+    if [ -f /system/bin/dex2oat ]; then
+        /system/bin/dex2oat --runtime-arg -Xms64m --runtime-arg -Xmx256m \
+            --dex-file=/system/framework/webview.jar \
+            --oat-file=/data/maxregner_webos/webview.odex 2>/dev/null &
+    fi
+    
+    # Warm up WebView process
+    am start -a android.intent.action.VIEW -d "about:blank" \
+        com.android.browser/.BrowserActivity 2>/dev/null &
+    sleep 2
+    am force-stop com.android.browser 2>/dev/null
+}
+
+# Main execution
+case "$1" in
+    "preload")
+        preload_webview
+        ;;
+    *)
+        start_chromium "$@"
+        ;;
+esac
+

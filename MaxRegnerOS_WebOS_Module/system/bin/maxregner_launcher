@@ -1,0 +1,179 @@
+#!/system/bin/sh
+
+##########################################################################################
+# MaxRegnerOS Web Launcher v1.1
+# Ultra-lightweight web-based launcher for Samsung Galaxy Z Flip5
+##########################################################################################
+
+export LAUNCHER_VERSION="1.1"
+export LAUNCHER_CONFIG="/data/maxregner_webos/launcher_config.json"
+export LAUNCHER_CACHE="/data/maxregner_webos/launcher_cache"
+
+# Default configuration
+DEFAULT_HOMEPAGE="https://www.google.com"
+DEFAULT_SEARCH_ENGINE="https://www.google.com/search?q="
+KIOSK_MODE=false
+FULLSCREEN_MODE=true
+
+# Create launcher directories
+mkdir -p "$(dirname "$LAUNCHER_CONFIG")"
+mkdir -p "$LAUNCHER_CACHE"
+
+# Function to create default launcher config
+create_default_config() {
+    cat > "$LAUNCHER_CONFIG" << EOF
+{
+  "version": "1.1",
+  "homepage": "$DEFAULT_HOMEPAGE",
+  "search_engine": "$DEFAULT_SEARCH_ENGINE",
+  "kiosk_mode": $KIOSK_MODE,
+  "fullscreen": $FULLSCREEN_MODE,
+  "bookmarks": [
+    {"name": "Google", "url": "https://www.google.com"},
+    {"name": "YouTube", "url": "https://www.youtube.com"},
+    {"name": "Gmail", "url": "https://mail.google.com"},
+    {"name": "Maps", "url": "https://maps.google.com"},
+    {"name": "Drive", "url": "https://drive.google.com"},
+    {"name": "Photos", "url": "https://photos.google.com"}
+  ],
+  "web_apps": [
+    {"name": "WhatsApp Web", "url": "https://web.whatsapp.com", "icon": "messaging"},
+    {"name": "Telegram Web", "url": "https://web.telegram.org", "icon": "messaging"},
+    {"name": "Discord", "url": "https://discord.com/app", "icon": "gaming"},
+    {"name": "Spotify", "url": "https://open.spotify.com", "icon": "music"},
+    {"name": "Netflix", "url": "https://www.netflix.com", "icon": "video"},
+    {"name": "Office 365", "url": "https://office.com", "icon": "productivity"}
+  ]
+}
+EOF
+}
+
+# Function to start web launcher
+start_launcher() {
+    echo "Starting MaxRegnerOS Web Launcher v1.1..."
+    
+    # Create config if it doesn't exist
+    if [ ! -f "$LAUNCHER_CONFIG" ]; then
+        create_default_config
+    fi
+    
+    # Read homepage from config
+    if [ -f "$LAUNCHER_CONFIG" ]; then
+        HOMEPAGE=$(grep -o '"homepage": *"[^"]*"' "$LAUNCHER_CONFIG" | cut -d'"' -f4)
+        HOMEPAGE=${HOMEPAGE:-$DEFAULT_HOMEPAGE}
+    else
+        HOMEPAGE=$DEFAULT_HOMEPAGE
+    fi
+    
+    echo "Loading homepage: $HOMEPAGE"
+    
+    # Set launcher as default home
+    pm set-home-activity com.maxregner.webos.launcher/.MainActivity 2>/dev/null
+    
+    # Start web engine with homepage
+    /system/bin/webos_engine start "$HOMEPAGE"
+}
+
+# Function to launch web app
+launch_webapp() {
+    local APP_NAME="$1"
+    local APP_URL="$2"
+    
+    if [ -z "$APP_URL" ]; then
+        echo "Usage: maxregner_launcher webapp <name> <url>"
+        return 1
+    fi
+    
+    echo "Launching web app: $APP_NAME"
+    echo "URL: $APP_URL"
+    
+    # Launch in fullscreen mode
+    /system/bin/webos_engine start "$APP_URL"
+}
+
+# Function to add bookmark
+add_bookmark() {
+    local NAME="$1"
+    local URL="$2"
+    
+    if [ -z "$NAME" ] || [ -z "$URL" ]; then
+        echo "Usage: maxregner_launcher bookmark <name> <url>"
+        return 1
+    fi
+    
+    echo "Adding bookmark: $NAME -> $URL"
+    
+    # Simple bookmark storage (in real implementation, would update JSON)
+    echo "$NAME|$URL" >> /data/maxregner_webos/bookmarks.txt
+    echo "Bookmark added successfully"
+}
+
+# Function to show launcher status
+show_status() {
+    echo "MaxRegnerOS Web Launcher v1.1 Status"
+    echo "====================================="
+    echo "Version: $LAUNCHER_VERSION"
+    echo "Config: $LAUNCHER_CONFIG"
+    echo "Cache: $LAUNCHER_CACHE"
+    
+    if [ -f "$LAUNCHER_CONFIG" ]; then
+        echo "Homepage: $(grep -o '"homepage": *"[^"]*"' "$LAUNCHER_CONFIG" | cut -d'"' -f4)"
+        echo "Kiosk Mode: $(grep -o '"kiosk_mode": *[^,}]*' "$LAUNCHER_CONFIG" | cut -d':' -f2 | tr -d ' ')"
+        echo "Fullscreen: $(grep -o '"fullscreen": *[^,}]*' "$LAUNCHER_CONFIG" | cut -d':' -f2 | tr -d ' ')"
+    fi
+    
+    echo "Cache Size: $(du -sh "$LAUNCHER_CACHE" 2>/dev/null | cut -f1)"
+    echo "Bookmarks: $(wc -l < /data/maxregner_webos/bookmarks.txt 2>/dev/null || echo 0)"
+}
+
+# Function to clear launcher cache
+clear_cache() {
+    echo "Clearing launcher cache..."
+    rm -rf "$LAUNCHER_CACHE"/*
+    mkdir -p "$LAUNCHER_CACHE"
+    echo "Launcher cache cleared"
+}
+
+# Main execution
+case "$1" in
+    "start"|"")
+        start_launcher
+        ;;
+    "webapp")
+        launch_webapp "$2" "$3"
+        ;;
+    "bookmark")
+        add_bookmark "$2" "$3"
+        ;;
+    "status")
+        show_status
+        ;;
+    "clear-cache")
+        clear_cache
+        ;;
+    "config")
+        if [ -f "$LAUNCHER_CONFIG" ]; then
+            cat "$LAUNCHER_CONFIG"
+        else
+            echo "Config file not found. Run 'maxregner_launcher start' to create default config."
+        fi
+        ;;
+    *)
+        echo "MaxRegnerOS Web Launcher v1.1"
+        echo "Usage: maxregner_launcher [command] [options]"
+        echo ""
+        echo "Commands:"
+        echo "  start              Start the web launcher (default)"
+        echo "  webapp <name> <url> Launch a web application"
+        echo "  bookmark <name> <url> Add a bookmark"
+        echo "  status             Show launcher status"
+        echo "  clear-cache        Clear launcher cache"
+        echo "  config             Show current configuration"
+        echo ""
+        echo "Examples:"
+        echo "  maxregner_launcher start"
+        echo "  maxregner_launcher webapp 'WhatsApp' 'https://web.whatsapp.com'"
+        echo "  maxregner_launcher bookmark 'GitHub' 'https://github.com'"
+        ;;
+esac
+

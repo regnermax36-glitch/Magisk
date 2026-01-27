@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<permissions>
+    <permission name="com.maxregner.webos.SYSTEM_ACCESS" >
+        <group gid="system" />
+    </permission>
+    
+    <permission name="com.maxregner.webos.WEBVIEW_ACCESS" >
+        <group gid="webview_zygote" />
+    </permission>
+    
+    <assign-permission name="android.permission.INTERNET" uid="webos_core" />
+    <assign-permission name="android.permission.ACCESS_NETWORK_STATE" uid="webos_core" />
+    <assign-permission name="android.permission.WRITE_SETTINGS" uid="webos_core" />
+    <assign-permission name="android.permission.SYSTEM_ALERT_WINDOW" uid="webos_core" />
+    
+    <library name="com.maxregner.webos.core"
+        file="/system/framework/maxregner-webos-core.jar" />
+        
+    <library name="com.maxregner.webos.webview"
+        file="/system/framework/maxregner-webos-webview.jar" />
+</permissions>
+
