@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.maxregner.webos.core"
+    android:versionCode="11"
+    android:versionName="1.1"
+    android:sharedUserId="android.uid.system">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.DEVICE_POWER" />
+    <uses-permission android:name="android.permission.REBOOT" />
+
+    <application
+        android:name=".WebOSCoreApplication"
+        android:allowBackup="false"
+        android:icon="@drawable/ic_webos_core"
+        android:label="WebOS Core"
+        android:persistent="true"
+        android:process=":core">
+
+        <service
+            android:name=".WebOSCoreService"
+            android:exported="false"
+            android:enabled="true"
+            android:process=":core" />
+
+        <service
+            android:name=".WebViewService"
+            android:exported="false"
+            android:enabled="true"
+            android:isolatedProcess="false" />
+
+        <receiver
+            android:name=".WebOSBootReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+        </receiver>
+
+        <provider
+            android:name=".WebOSSettingsProvider"
+            android:authorities="com.maxregner.webos.core.settings"
+            android:exported="false"
+            android:multiprocess="false" />
+
+    </application>
+
+</manifest>
+

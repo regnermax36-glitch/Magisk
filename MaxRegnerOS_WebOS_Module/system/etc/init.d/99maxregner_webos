@@ -1,0 +1,54 @@
+#!/system/bin/sh
+
+##########################################################################################
+# MaxRegnerOS WebOS v1.1 - Init.d Script
+# System optimization for web-based OS
+##########################################################################################
+
+# Wait for system to be ready
+sleep 10
+
+# Log startup
+echo "$(date): MaxRegnerOS WebOS v1.1 init.d script started" >> /data/maxregner_webos/init.log
+
+# Memory optimizations
+echo 1 > /proc/sys/vm/drop_caches
+echo 10 > /proc/sys/vm/swappiness
+echo 0 > /proc/sys/vm/oom_kill_allocating_task
+
+# Network optimizations for web browsing
+echo 1 > /proc/sys/net/ipv4/tcp_window_scaling
+echo 1 > /proc/sys/net/ipv4/tcp_timestamps
+echo 1 > /proc/sys/net/ipv4/tcp_sack
+echo 2 > /proc/sys/net/ipv4/tcp_syn_retries
+echo 2 > /proc/sys/net/ipv4/tcp_synack_retries
+
+# CPU governor optimization
+for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+    if [ -f "$cpu" ]; then
+        echo "performance" > "$cpu" 2>/dev/null || echo "ondemand" > "$cpu" 2>/dev/null
+    fi
+done
+
+# I/O scheduler optimization
+for queue in /sys/block/*/queue/scheduler; do
+    if [ -f "$queue" ]; then
+        echo "deadline" > "$queue" 2>/dev/null || echo "cfq" > "$queue" 2>/dev/null
+    fi
+done
+
+# GPU optimization
+if [ -f /sys/class/kgsl/kgsl-3d0/devfreq/governor ]; then
+    echo "performance" > /sys/class/kgsl/kgsl-3d0/devfreq/governor 2>/dev/null
+fi
+
+# Disable unnecessary services for web OS
+stop media 2>/dev/null
+stop drm 2>/dev/null
+stop camera 2>/dev/null
+
+# Start web OS services
+start webos_core 2>/dev/null
+
+echo "$(date): MaxRegnerOS WebOS v1.1 optimizations applied" >> /data/maxregner_webos/init.log
+
