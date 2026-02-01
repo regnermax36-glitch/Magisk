@@ -4,15 +4,10 @@
 #include <fcntl.h>
 #include <vector>
 #include <cstring>
-#include <sys/system_properties.h>
 
 #include <base.hpp>
 
 #include "init.hpp"
-
-#ifndef PROP_VALUE_MAX
-#define PROP_VALUE_MAX 92
-#endif
 
 using namespace std;
 
@@ -145,20 +140,9 @@ void BootConfig::set(const kv_pairs &kv) noexcept {
             strscpy(dt_dir.data(), value.data(), dt_dir.size());
         } else if (key == "androidboot.hardware") {
             strscpy(hardware.data(), value.data(), hardware.size());
-            // Samsung Galaxy Z Flip5 (b5q) specific detection
+            // Samsung Galaxy Z Flip5 (b5q) specific detection will be handled by shell scripts
             if (value == "qcom" || value == "lahaina") {
-                // Check for Samsung Galaxy Z Flip5 specific properties
-                char model_prop[PROP_VALUE_MAX];
-                char device_prop[PROP_VALUE_MAX];
-                __system_property_get("ro.product.model", model_prop);
-                __system_property_get("ro.product.device", device_prop);
-                
-                if (strstr(model_prop, "SM-F731") != nullptr || strcmp(device_prop, "b5q") == 0) {
-                    LOGI("Samsung Galaxy Z Flip5 detected, enabling enhanced A/B support\n");
-                    // Set Samsung-specific flags
-                    __system_property_set("ro.maxregner.samsung_zflip5", "true");
-                    __system_property_set("ro.maxregner.enhanced_ab", "true");
-                }
+                LOGD("Qualcomm hardware detected: %s\n", value.data());
             }
         } else if (key == "androidboot.hardware.platform") {
             strscpy(hardware_plat.data(), value.data(), hardware_plat.size());
