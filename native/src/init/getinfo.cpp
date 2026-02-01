@@ -139,6 +139,18 @@ void BootConfig::set(const kv_pairs &kv) noexcept {
             strscpy(dt_dir.data(), value.data(), dt_dir.size());
         } else if (key == "androidboot.hardware") {
             strscpy(hardware.data(), value.data(), hardware.size());
+            // Samsung Galaxy Z Flip5 (b5q) specific detection
+            if (value == "qcom" || value == "lahaina") {
+                // Check for Samsung Galaxy Z Flip5 specific properties
+                auto model = getprop("ro.product.model");
+                auto device = getprop("ro.product.device");
+                if (model.find("SM-F731") != std::string::npos || device == "b5q") {
+                    LOGI("Samsung Galaxy Z Flip5 detected, enabling enhanced A/B support\n");
+                    // Set Samsung-specific flags
+                    setprop("ro.maxregner.samsung_zflip5", "true");
+                    setprop("ro.maxregner.enhanced_ab", "true");
+                }
+            }
         } else if (key == "androidboot.hardware.platform") {
             strscpy(hardware_plat.data(), value.data(), hardware_plat.size());
         } else if (key == "androidboot.fstab_suffix") {

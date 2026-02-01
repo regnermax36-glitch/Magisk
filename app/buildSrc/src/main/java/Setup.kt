@@ -186,7 +186,8 @@ fun Project.setupCoreLib() {
                 inputs.property("versionCode", Config.versionCode)
                 from(rootFile("scripts")) {
                     include("util_functions.sh", "boot_patch.sh", "addon.d.sh",
-                        "app_functions.sh", "uninstaller.sh", "module_installer.sh")
+                        "app_functions.sh", "uninstaller.sh", "module_installer.sh",
+                        "maxregner_functions.sh", "maxregner_ab_manager.sh", "maxregner_filesystem.sh")
                 }
                 from(rootFile("tools/bootctl"))
                 into("chromeos") {
