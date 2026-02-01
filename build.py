@@ -634,7 +634,49 @@ def push_files(script: Path):
         build_all()
     ensure_adb()
 
-    abi = cmd_out([adb_path, "shell", "getprop", "ro.product.cpu.abi"])
+    # Retry ABI detection with better error handling
+    abi = None
+    for attempt in range(5):
+        try:
+            # Wait for device to be ready
+            proc = execv([adb_path, "wait-for-device"])
+            if proc.returncode != 0:
+                continue
+            
+            # Try to get ABI
+            abi = cmd_out([adb_path, "shell", "getprop", "ro.product.cpu.abi"])
+            if abi and abi.strip():
+                abi = abi.strip()
+                break
+            
+            # If ABI is empty, wait and retry
+            if attempt < 4:
+                vprint(f"ABI detection attempt {attempt + 1} failed, retrying...")
+                import time
+                time.sleep(2)
+        except Exception as e:
+            vprint(f"ABI detection attempt {attempt + 1} failed with exception: {e}")
+            if attempt < 4:
+                import time
+                time.sleep(2)
+    
+    if not abi:
+        # Fallback: try to detect ABI from alternative methods
+        vprint("Primary ABI detection failed, trying fallback methods...")
+        
+        # Try alternative property
+        abi = cmd_out([adb_path, "shell", "getprop", "ro.product.cpu.abilist"])
+        if abi and abi.strip():
+            # Take the first ABI from the list
+            abi = abi.strip().split(',')[0]
+            vprint(f"Detected ABI from abilist: {abi}")
+        else:
+            # Try another property
+            abi = cmd_out([adb_path, "shell", "getprop", "ro.product.cpu.abilist64"])
+            if abi and abi.strip():
+                abi = abi.strip().split(',')[0]
+                vprint(f"Detected ABI from abilist64: {abi}")
+    
     if not abi:
         error("Cannot detect emulator ABI")
 
