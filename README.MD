@@ -1,18 +1,28 @@
 ![](docs/images/logo.png)
 
+# 🦖 **MAGISK GODZILLA** 🦖
+### *Project Treble • Android 16 GSI • Samsung Galaxy Z Flip5 Optimized*
+
 [![Downloads](https://img.shields.io/badge/dynamic/json?color=green&label=Downloads&query=totalString&url=https%3A%2F%2Fraw.githubusercontent.com%2Ftopjohnwu%2Fmagisk-files%2Fcount%2Fcount.json&cacheSeconds=1800)](https://raw.githubusercontent.com/topjohnwu/magisk-files/count/count.json)
+[![Treble](https://img.shields.io/badge/Project%20Treble-Enabled-brightgreen)](https://developer.android.com/topic/generic-system-image)
+[![Android 16](https://img.shields.io/badge/Android%2016-GSI%20Ready-blue)](https://developer.android.com/about/versions/16)
+[![SM-F731B](https://img.shields.io/badge/Galaxy%20Z%20Flip5-Optimized-purple)](https://www.samsung.com/galaxy-z-flip5)
 
 #### This is not an officially supported Google product
 
-## Introduction
+## 🚀 Introduction
 
-Magisk is a suite of open source software for customizing Android, supporting devices higher than Android 6.0.<br>
-Some highlight features:
+**Magisk Godzilla** is the ultimate evolution of Magisk - a monster-sized suite of open source software for customizing Android with **full Project Treble support** and **Android 16 GSI compatibility**. Specially optimized for Samsung Galaxy Z Flip5 (SM-F731B/b5q) and other Treble-enabled devices.
 
-- **MagiskSU**: Provide root access for applications
-- **Magisk Modules**: Modify read-only partitions by installing modules
-- **MagiskBoot**: The most complete tool for unpacking and repacking Android boot images
-- **Zygisk**: Run code in every Android applications' processes
+### 🔥 **Core Features:**
+
+- **🦖 MagiskSU Godzilla**: Enhanced root access with Treble awareness
+- **📦 Treble-Smart Modules**: Modules that respect vendor/system separation  
+- **🥾 MagiskBoot Treble**: Advanced boot image patching with VINTF support
+- **🧬 Zygisk Treble**: Process injection compatible with GSI architecture
+- **🌐 GSI Boot Manager**: Seamless Android 16 GSI booting capabilities
+- **🔧 VINTF Handler**: Vendor Interface management for HAL compatibility
+- **📱 Samsung Z Flip5 Support**: Hardware-specific optimizations for foldable devices
 
 ## Downloads
 
