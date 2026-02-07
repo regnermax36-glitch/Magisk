@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GODZILLA_CONFIG_H
+#define GODZILLA_CONFIG_H
 
 /*
  * Magisk Godzilla Configuration Header
