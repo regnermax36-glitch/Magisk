@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "../../godzilla_config.h"
+#include "../../../godzilla_config.h"
 
 namespace godzilla {
 
