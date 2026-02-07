@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 #include <map>
-#include "../../../godzilla_config.h"
+#include "../../godzilla_config.h"
 
 namespace godzilla {
 
