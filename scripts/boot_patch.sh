@@ -1,6 +1,7 @@
 #!/system/bin/sh
 #######################################################################################
-# Magisk Boot Image Patcher
+# 🦖 MAGISK GODZILLA BOOT IMAGE PATCHER 🦖
+# Project Treble • Android 16 GSI • Samsung Galaxy Z Flip5 Optimized
 #######################################################################################
 #
 # Usage: boot_patch.sh <bootimage>
@@ -55,9 +56,19 @@ if [ -z $SOURCEDMODE ]; then
   cd "$(getdir "${BASH_SOURCE:-$0}")"
   # Load utility functions
   . ./util_functions.sh
+  # Load Godzilla Treble functions
+  . ./godzilla_treble_functions.sh
   # Check if 64-bit
   api_level_arch_detect
 fi
+
+# 🦖 Magisk Godzilla Initialization
+ui_print "🦖 MAGISK GODZILLA v1.0.0"
+ui_print "   Project Treble • Android 16 GSI • Samsung Z Flip5"
+ui_print ""
+
+# Initialize Treble support
+initialize_treble_support
 
 BOOTIMAGE="$1"
 [ -e "$BOOTIMAGE" ] || abort "$BOOTIMAGE does not exist!"

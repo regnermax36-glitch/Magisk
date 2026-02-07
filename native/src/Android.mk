@@ -7,7 +7,7 @@ LOCAL_PATH := $(call my-dir)
 ifdef B_MAGISK
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := magisk
+LOCAL_MODULE := magisk_godzilla
 LOCAL_STATIC_LIBRARIES := \
     libbase \
     libsystemproperties \
@@ -27,7 +27,8 @@ LOCAL_SRC_FILES := \
     core/zygisk/hook.cpp \
     core/deny/cli.cpp \
     core/deny/utils.cpp \
-    core/deny/logcat.cpp
+    core/deny/logcat.cpp \
+    godzilla/treble_manager.cpp
 
 LOCAL_LDLIBS := -llog
 LOCAL_LDFLAGS := -Wl,--dynamic-list=src/exported_sym.txt
