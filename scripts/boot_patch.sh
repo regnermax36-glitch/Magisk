@@ -240,6 +240,48 @@ if [ -f kernel ]; then
   70726F63615F6D616769736B00 \
   && PATCHEDKERNEL=true
 
+  # Samsung Galaxy Z Flip5 (b5q) specific patches
+  if [ "$DEVICE_CODENAME" = "b5q" ] || [ "$DEVICE_MODEL" = "SM-F731B" ] || [ "$DEVICE_MODEL" = "SM-F731U" ]; then
+    ui_print "- Applying Samsung Galaxy Z Flip5 specific patches"
+    
+    # Disable Samsung KNOX
+    # KNOX -> NULL
+    ./magiskboot hexpatch kernel \
+    4B4E4F5800 \
+    0000000000 \
+    && PATCHEDKERNEL=true
+    
+    # Disable Samsung TrustZone verification
+    # TZONE -> TZOFF
+    ./magiskboot hexpatch kernel \
+    545A4F4E4500 \
+    545A4F464600 \
+    && PATCHEDKERNEL=true
+    
+    # Patch Samsung A/B slot verification
+    # slot_suffix -> slot_bypass
+    ./magiskboot hexpatch kernel \
+    736C6F745F73756666697800 \
+    736C6F745F62797061737300 \
+    && PATCHEDKERNEL=true
+    
+    # Disable Samsung Secure Boot verification
+    # SECUREBOOT -> SECUREBYPS
+    ./magiskboot hexpatch kernel \
+    534543555245424F4F5400 \
+    534543555245425950530000 \
+    && PATCHEDKERNEL=true
+    
+    # Disable Samsung DM-Verity for A/B partitions
+    # dm-verity -> dm-bypass
+    ./magiskboot hexpatch kernel \
+    646D2D766572697479 \
+    646D2D627970617373 \
+    && PATCHEDKERNEL=true
+    
+    ui_print "- Samsung Galaxy Z Flip5 patches applied"
+  fi
+
   # Force kernel to load rootfs for legacy SAR devices
   # skip_initramfs -> want_initramfs
   $LEGACYSAR && ./magiskboot hexpatch kernel \

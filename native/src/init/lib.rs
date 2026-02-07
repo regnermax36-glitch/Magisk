@@ -76,6 +76,7 @@ pub mod ffi {
     }
     unsafe extern "C++" {
         fn init(self: &mut BootConfig);
+        fn detect_ab_support(self: &mut BootConfig);
         type kv_pairs;
         fn set(self: &mut BootConfig, config: &kv_pairs);
     }
