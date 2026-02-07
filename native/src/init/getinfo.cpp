@@ -172,6 +172,75 @@ if (access(file_name, R_OK) == 0) {                                 \
     }                                                               \
 }
 
+void BootConfig::detect_ab_support() noexcept {
+    // If slot is already detected from boot parameters, skip fallback detection
+    if (slot[0] != '\0') {
+        LOGD("A/B slot already detected from boot parameters: %s\n", slot.data());
+        return;
+    }
+    
+    // Fallback A/B detection methods for Samsung Galaxy Z Flip5 (b5q) and other devices
+    LOGD("A/B slot not found in boot parameters, attempting fallback detection...\n");
+    
+    // Method 1: Check for A/B partition layout by looking for system_a/system_b partitions
+    if (access("/dev/block/by-name/system_a", F_OK) == 0 && 
+        access("/dev/block/by-name/system_b", F_OK) == 0) {
+        LOGD("A/B partitions detected via /dev/block/by-name/system_a and system_b\n");
+        
+        // Try to determine current slot from boot partition
+        if (access("/dev/block/by-name/boot_a", F_OK) == 0 && 
+            access("/dev/block/by-name/boot_b", F_OK) == 0) {
+            // Default to slot A if we can't determine current slot
+            strscpy(slot.data(), "_a", slot.size());
+            LOGD("A/B support enabled, defaulting to slot A\n");
+        } else {
+            strscpy(slot.data(), "_a", slot.size());
+            LOGD("A/B system partitions found, defaulting to slot A\n");
+        }
+        return;
+    }
+    
+    // Method 2: Check device tree for A/B support
+    char file_name[128];
+    ssprintf(file_name, sizeof(file_name), "%s/firmware/android/slot_suffix", dt_dir.data());
+    if (access(file_name, R_OK) == 0) {
+        string data = full_read(file_name);
+        if (!data.empty()) {
+            data.pop_back(); // Remove trailing newline
+            if (!data.empty() && data != "normal") {
+                strscpy(slot.data(), data.data(), slot.size());
+                LOGD("A/B slot detected from device tree: %s\n", slot.data());
+                return;
+            }
+        }
+    }
+    
+    // Method 3: Samsung-specific detection for Galaxy Z Flip5 (b5q)
+    if (strstr(hardware.data(), "lahaina") || strstr(hardware.data(), "qcom")) {
+        // Check for Samsung A/B partition naming
+        if (access("/dev/block/by-name/system", F_OK) != 0 && 
+            (access("/dev/block/by-name/super_a", F_OK) == 0 || 
+             access("/dev/block/by-name/super_b", F_OK) == 0)) {
+            strscpy(slot.data(), "_a", slot.size());
+            LOGD("Samsung A/B support detected via super partitions, defaulting to slot A\n");
+            return;
+        }
+    }
+    
+    // Method 4: Check for dynamic partitions with A/B support
+    if (access("/dev/block/by-name/super", F_OK) == 0) {
+        // Check if super partition has A/B variants
+        if (access("/dev/block/by-name/super_a", F_OK) == 0 || 
+            access("/dev/block/by-name/super_b", F_OK) == 0) {
+            strscpy(slot.data(), "_a", slot.size());
+            LOGD("Dynamic A/B partitions detected via super_a/super_b, defaulting to slot A\n");
+            return;
+        }
+    }
+    
+    LOGD("No A/B partition support detected, device appears to be A-only\n");
+}
+
 void BootConfig::init() noexcept {
     set(parse_cmdline(full_read("/proc/cmdline")));
     set(parse_bootconfig(full_read("/proc/bootconfig")));
@@ -192,6 +261,9 @@ void BootConfig::init() noexcept {
     read_dt("hardware", hardware)
     read_dt("hardware.platform", hardware_plat)
 
+    // A/B partition support detection fallback
+    detect_ab_support();
+    
     LOGD("Device config:\n");
     print();
 }
