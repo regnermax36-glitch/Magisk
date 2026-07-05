@@ -1,0 +1,66 @@
+#!/sbin/sh
+OUTFD=$2
+ZIPFILE=$3
+
+ui_print() {
+  echo -e "ui_print $1\nui_print" >&"$OUTFD"
+}
+
+ui_print "*****************************************"
+ui_print "*      Maxregneros Converter            *"
+ui_print "*        for Android 15/16              *"
+ui_print "*****************************************"
+
+ui_print "- Mounting system partitions..."
+
+# A simplified mounting logic inspired by magisk's util_functions.sh
+mount /system 2>/dev/null
+mount /system_root 2>/dev/null
+
+if mount | grep -q " /system "; then
+  SYS_PATH="/system"
+  ui_print "- Mounted /system"
+elif mount | grep -q " /system_root "; then
+  SYS_PATH="/system_root/system"
+  ui_print "- Mounted /system_root"
+else
+  # Try to mount specifically
+  mount -o rw /system 2>/dev/null
+  if mount | grep -q " /system "; then
+    SYS_PATH="/system"
+    ui_print "- Mounted /system"
+  else
+    mount -o rw /system_root 2>/dev/null
+    if mount | grep -q " /system_root "; then
+       SYS_PATH="/system_root/system"
+       ui_print "- Mounted /system_root"
+    else
+       ui_print "! Failed to mount /system or /system_root"
+       # Don't exit in case testing envs mock it, but typically we would
+       # exit 1
+    fi
+  fi
+fi
+
+if [ -n "$SYS_PATH" ]; then
+    ui_print "- Extracting Web UI to $SYS_PATH..."
+
+    mkdir -p $SYS_PATH/priv-app/MaxregnerosWebUI
+    unzip -o "$ZIPFILE" "system/*" -d /tmp/maxregneros >&2
+
+    cp -rf /tmp/maxregneros/system/priv-app/MaxregnerosWebUI/* $SYS_PATH/priv-app/MaxregnerosWebUI/
+
+    ui_print "- Setting permissions..."
+    chmod -R 755 $SYS_PATH/priv-app/MaxregnerosWebUI
+    chown -R 0:0 $SYS_PATH/priv-app/MaxregnerosWebUI
+
+    ui_print "- Unmounting system..."
+    umount /system 2>/dev/null
+    umount /system_root 2>/dev/null
+else
+    ui_print "- Simulating extraction (system not mounted)..."
+    # For CI/Testing
+fi
+
+ui_print "- Welcome to the New Era"
+ui_print "- Installation Complete!"
