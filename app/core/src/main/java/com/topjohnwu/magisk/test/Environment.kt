@@ -151,6 +151,7 @@ class Environment : BaseTest {
         // Create an empty zygisk folder
         val module = LocalModule(path)
         assertTrue(error, module.zygiskFolder.mkdirs())
+        assertTrue(error, Shell.cmd("set_default_perm $path").exec().isSuccess)
     }
 
     private fun setupInvalidZygiskModule(root: ExtendedFile) {
