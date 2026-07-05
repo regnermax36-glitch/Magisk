@@ -161,14 +161,13 @@ class Environment : BaseTest {
         val path = root.getChildFile(INVALID_ZYGISK)
 
         // Create invalid zygisk libraries
-        assertTrue(error, path.mkdirs())
-        val zygiskFolder = path.getChildFile("zygisk")
-        assertTrue(error, zygiskFolder.mkdirs())
-        assertTrue(error, zygiskFolder.getChildFile("armeabi-v7a.so").createNewFile())
-        assertTrue(error, zygiskFolder.getChildFile("arm64-v8a.so").createNewFile())
-        assertTrue(error, zygiskFolder.getChildFile("x86.so").createNewFile())
-        assertTrue(error, zygiskFolder.getChildFile("x86_64.so").createNewFile())
-        assertTrue(error, zygiskFolder.getChildFile("unloaded").createNewFile())
+        val module = LocalModule(path)
+        assertTrue(error, module.zygiskFolder.mkdirs())
+        assertTrue(error, module.zygiskFolder.getChildFile("armeabi-v7a.so").createNewFile())
+        assertTrue(error, module.zygiskFolder.getChildFile("arm64-v8a.so").createNewFile())
+        assertTrue(error, module.zygiskFolder.getChildFile("x86.so").createNewFile())
+        assertTrue(error, module.zygiskFolder.getChildFile("x86_64.so").createNewFile())
+        assertTrue(error, module.zygiskFolder.getChildFile("unloaded").createNewFile())
 
         assertTrue(error, Shell.cmd("set_default_perm $path").exec().isSuccess)
     }
