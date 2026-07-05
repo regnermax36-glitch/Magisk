@@ -151,6 +151,7 @@ class Environment : BaseTest {
         // Create an empty zygisk folder
         val module = LocalModule(path)
         assertTrue(error, module.zygiskFolder.mkdirs())
+        assertTrue(error, module.zygiskFolder.getChildFile("unloaded").createNewFile())
         assertTrue(error, Shell.cmd("set_default_perm $path").exec().isSuccess)
     }
 
@@ -165,6 +166,7 @@ class Environment : BaseTest {
         assertTrue(error, module.zygiskFolder.getChildFile("arm64-v8a.so").createNewFile())
         assertTrue(error, module.zygiskFolder.getChildFile("x86.so").createNewFile())
         assertTrue(error, module.zygiskFolder.getChildFile("x86_64.so").createNewFile())
+        assertTrue(error, module.zygiskFolder.getChildFile("unloaded").createNewFile())
 
         assertTrue(error, Shell.cmd("set_default_perm $path").exec().isSuccess)
     }
